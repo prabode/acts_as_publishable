@@ -1,11 +1,11 @@
 ActsAsPublishable
 ================
 
-With acts as publishable, you turn any model into a publishable model. It creates useful readiness messages for each model, that will show in tool tip like element when clicked on "not ready" icon,  It provides all the required components to make a model publish, unpublish, archive and reset.
+With acts as publishable, you can turn any model into a publishable model. It provides all the required components that you need to publish, unpublish, archive or reset a publishable model. One of the cool feature is the readiness messages, when you clicked on the "not ready" icon, the readiness messages for each object is shown in a tooltip like element.
 Example
 =======
 
-Example goes here.
+visit http://publishable.continuouslearning.org
 
 
 Copyright (c) 2009 [Prabode Weebadde, Sharn Jayantha], released under the MIT license
