@@ -7,6 +7,7 @@ Example
 
 visit http://publishable.continuouslearning.org
 
+script/plugin install git://github.com/prabode/acts_as_publishable
 
 To create the publishing components under
 app/controller
