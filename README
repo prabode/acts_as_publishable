@@ -8,4 +8,38 @@ Example
 visit http://publishable.continuouslearning.org
 
 
+To create the publishing components under
+app/controller
+app/views
+run
+    ./script/generate publishing 
+    
+To create the publishing components under admin
+app/controller/admin
+app/views/admin
+run  
+    ./script/generate publishing Admin
+
+    This will create:
+      create  app/controllers/admin
+      create  app/controllers/admin/publishing_controller.rb
+       force  vendor/plugins/acts_as_publishable/lib/publishable/publishable_helper.rb
+      create  app/views/admin/publishing
+      create  app/views/admin/publishing/_publishing_status.rhtml
+      create  app/views/admin/publishing/_publishing_tooltip.rhtml
+      create  app/views/admin/publishing/_tooltip_publishing_status.rhtml
+      create  public/images/admin/publishing
+      create  public/images/admin/publishing/not_ready.png
+      create  public/images/admin/publishing/not_ready_small.png
+      create  public/images/admin/publishing/ready.png
+      create  public/images/admin/publishing/ready_small.png
+      create  public/images/admin/publishing/published.png
+      create  public/images/admin/publishing/published_small.png
+      create  public/images/admin/publishing/archived.png
+      create  public/images/admin/publishing/archived_small.png
+      create  public/images/admin/publishing/arrow.png
+      create  test/functional/admin
+      create  test/functional/admin/publishing_controller_test.rb
+
+
 Copyright (c) 2009 [Prabode Weebadde, Sharn Jayantha], released under the MIT license
