@@ -1,47 +1,69 @@
-ActsAsPublishable
-================
 
-With acts as publishable, you can turn any model into a publishable model. It provides all the required components that you need to publish, unpublish, archive or reset a publishable model. One of the cool features is, the readiness messages, when you clicked on the "not ready" icon, the readiness messages for each object is shown in a tooltip like element.
+acts_as_publishable
+====
+
+With acts as publishable, you can turn any model into a publishable model. It provides all the required components that
+you need to publish, unpublish, archive or reset a publishable model. One of the cool features is, the readiness
+messages, when you clicked on the “not ready” icon, the readiness messages for each object is shown in a tooltip like
+element.
 
 Example
-=======
+===
 
 visit http://publishable.continuouslearning.org
 
+Step 1.
+
 script/plugin install git://github.com/prabode/acts_as_publishable
+
+Step 2.
 
 To create the publishing components under
 app/controller
 app/views
 run
-    ./script/generate publishing 
-    
+./script/generate publishing
+
 To create the publishing components under admin
 app/controller/admin
 app/views/admin
-run  
-    ./script/generate publishing Admin
+run
+./script/generate publishing Admin
+This will create:
 
-    This will create:
-      create  app/controllers/admin
-      create  app/controllers/admin/publishing_controller.rb
-       force  vendor/plugins/acts_as_publishable/lib/publishable/publishable_helper.rb
-      create  app/views/admin/publishing
-      create  app/views/admin/publishing/_publishing_status.rhtml
-      create  app/views/admin/publishing/_publishing_tooltip.rhtml
-      create  app/views/admin/publishing/_tooltip_publishing_status.rhtml
-      create  public/images/admin/publishing
-      create  public/images/admin/publishing/not_ready.png
-      create  public/images/admin/publishing/not_ready_small.png
-      create  public/images/admin/publishing/ready.png
-      create  public/images/admin/publishing/ready_small.png
-      create  public/images/admin/publishing/published.png
-      create  public/images/admin/publishing/published_small.png
-      create  public/images/admin/publishing/archived.png
-      create  public/images/admin/publishing/archived_small.png
-      create  public/images/admin/publishing/arrow.png
-      create  test/functional/admin
-      create  test/functional/admin/publishing_controller_test.rb
+    * create app/controllers/admin
+    * create app/controllers/admin/publishing_controller.rb
+    * force vendor/plugins/acts_as_publishable/lib/publishable/publishable_helper.rb
+    * create app/views/admin/publishing
+    * create app/views/admin/publishing/_publishing_status.rhtml
+    * create app/views/admin/publishing/_publishing_tooltip.rhtml
+    * create app/views/admin/publishing/_tooltip_publishing_status.rhtml
+    * create public/images/admin/publishing
+    * create public/images/admin/publishing/not_ready.png
+    * create public/images/admin/publishing/not_ready_small.png
+    * create public/images/admin/publishing/ready.png
+    * create public/images/admin/publishing/ready_small.png
+    * create public/images/admin/publishing/published.png
+    * create public/images/admin/publishing/published_small.png
+    * create public/images/admin/publishing/archived.png
+    * create public/images/admin/publishing/archived_small.png
+    * create public/images/admin/publishing/arrow.png
+    * create test/functional/admin
+    * create test/functional/admin/publishing_controller_test.rb
 
+Step 3.
+class Video < ActiveRecord::Base
+acts_as_publishable :required_fields_for_publishing => [“title”, “channels”, “video_file”, “thumbnails”]
 
-Copyright (c) 2009 [Prabode Weebadde, Sharn Jayantha], released under the MIT license
+end
+
+default status_column name is “status” alternatively you can provide a different column name using :status_column, like in the following example.
+
+class Magazine < ActiveRecord::Base
+acts_as_publishable :status_column => :stage, :required_fields_for_publishing => [“name”, “description”]
+end
+
+Step 4.
+Review tests for more information.
+
+Copyright © 2009 [Prabode Weebadde, Sharn Jayantha], released under the MIT license
