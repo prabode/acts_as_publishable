@@ -4,7 +4,7 @@ acts_as_publishable
 
 With acts as publishable, you can turn any model into a publishable model. It provides all the required components that
 you need to publish, unpublish, archive or reset a publishable model. One of the cool features is, the readiness
-messages, when you clicked on the “not ready” icon, the readiness messages for each object is shown in a tooltip like
+messages, when you click on a “not ready” icon, the readiness messages for each record is shown in a "tooltip" like
 element.
 
 Example
@@ -52,12 +52,16 @@ This will create:
     * create test/functional/admin/publishing_controller_test.rb
 
 Step 3.
+
+To use acts_as_publishable, add status* (:string), published_at (:datetime) and archived_at (:datetime) attributes to your model and define :required_fields_for_publishing fields as follows.
+During publishing actions, acts_as_publishable will set the status, published_at or archived_at and update your model.
+
 class Video < ActiveRecord::Base
 acts_as_publishable :required_fields_for_publishing => [“title”, “channels”, “video_file”, “thumbnails”]
 
 end
 
-default status_column name is “status” alternatively you can provide a different column name using :status_column, like in the following example.
+*default status_column name is “status” alternatively you can provide a different column name using :status_column, like in the following example.
 
 class Magazine < ActiveRecord::Base
 acts_as_publishable :status_column => :stage, :required_fields_for_publishing => [“name”, “description”]

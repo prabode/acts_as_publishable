@@ -33,7 +33,12 @@ class PublisherAuthor < ActiveRecord::Base
 end
 
 class Magazine < ActiveRecord::Base
-  acts_as_publishable :status_column => :stage, :required_fields_for_publishing => ["name", "description"]
+  has_many :chapters
+  acts_as_publishable :status_column => :stage, :required_fields_for_publishing => ["name", "description", "chapters"]
+end
+
+class Chapter < ActiveRecord::Base
+  belongs_to :magazine
 end
 
 class ActAsPublishableTest < Test::Unit::TestCase
@@ -52,13 +57,37 @@ class ActAsPublishableTest < Test::Unit::TestCase
   end
   
   def test_magazine_required_fields_for_publishing_should_be_equal_to_two
-    assert_equal 2, Magazine.required_fields_for_publishing.size
+    assert_equal 3, Magazine.required_fields_for_publishing.size
   end
   
   def test_initial_status_of_book
     book = Book.new
     book.save
     assert_equal "not_ready", book.status
+  end
+  
+  def test_initial_status_of_magazine
+    chapter = Chapter.create
+    
+    magazine = Magazine.new
+    magazine.name = "mag"
+    magazine.description = "mag"
+    magazine.chapters << chapter
+    magazine.save
+    assert_equal "ready", magazine.stage
+  end
+  
+  def test_status_of_magazine_should_be_not_ready
+    chapter = Chapter.create
+    magazine = Magazine.new
+    magazine.name = "mag"
+    magazine.description = "mag"
+    magazine.chapters << chapter
+    magazine.save
+    assert_equal "ready", magazine.stage
+    magazine.name = ""  
+    magazine.save
+    assert_equal "not_ready", magazine.stage
   end
   
   def test_book_publishing_status_not_ready_with_publishers_being_not_ready
@@ -168,12 +197,16 @@ class ActAsPublishableTest < Test::Unit::TestCase
     book.authors << author1
     book.authors << author2
     book.save
+    assert_nil book.published_at
+    
     book.publish
     
     assert_equal "published", book.status
     assert_equal "published", author1.status
     assert_equal "published", author2.status
-    assert_equal "published", publisher.status    
+    assert_equal "published", publisher.status  
+    
+    assert_not_nil book.published_at  
   end
   
   def test_book_is_ready
@@ -199,22 +232,31 @@ class ActAsPublishableTest < Test::Unit::TestCase
     book = get_book
     book.publish
     assert_equal "published", book.status
+    assert_not_nil book.published_at
+    assert_nil book.archived_at  
     book.archive
     assert_equal "archived", book.status 
     assert_equal true, book.archived? 
     assert_equal true, book.authors[0].published?
     assert_equal true, book.authors[1].published?
     assert_equal true, book.authors[0].publishers[0].published?
+    
+    assert_not_nil book.archived_at
   end
   
   def test_book_is_not_ready_from_archived
     book = get_book
     book.publish
     assert_equal "published", book.status
+    assert_not_nil book.published_at
     book.archive
     assert_equal "archived", book.status 
+    assert_not_nil book.archived_at
     book.reset
-    assert_equal "ready", book.status   
+    assert_equal "ready", book.status
+    assert_nil book.published_at
+    assert_nil book.archived_at
+    
     assert_equal true, book.authors[0].published?
     assert_equal true, book.authors[1].published?
     assert_equal true, book.authors[0].publishers[0].published?

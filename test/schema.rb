@@ -3,7 +3,9 @@ ActiveRecord::Schema.define(:version => 0) do
     t.string :name
     t.string :description
     t.string :status  
-    t.datetime :created_at  
+    t.datetime :created_at
+    t.datetime :published_at
+    t.datetime :archived_at
   end
   
   create_table :magazines, :force => true do |t| 
@@ -34,5 +36,10 @@ ActiveRecord::Schema.define(:version => 0) do
   create_table :publisher_authors, :force => true do |t|
     t.integer :publisher_id
     t.integer :author_id 
+  end
+  
+  create_table :chapters, :force => true do |t|
+    t.integer :magazine_id
+    t.string :name 
   end
 end 
