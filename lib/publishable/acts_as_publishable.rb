@@ -164,10 +164,7 @@ module Publishable
     end
     
     def validate_readiness(is_on_save = false)
-      #      path = File.expand_path "#{RAILS_ROOT}/config/locales/en.yml"
-      #      error_file = YAML.load_file(path)[self.class.name] || {}
-      error_file = {}
-      
+
       old_status = read_attribute(self.class.status_column) || "not_ready"
       write_attribute self.class.status_column, "not_ready"
       
@@ -196,10 +193,9 @@ module Publishable
         end
         
         unless valid
-          custom_error = error_file[field.to_s]
-        # TODO: i18n
-          auto_error = "This #{self.class} needs to have a #{field.to_s.humanize}."
-          readiness_errors << (custom_error || auto_error)
+          error_key = "#{self.class.name.downcase!}_#{field}"
+          readiness_error = I18n.t(error_key,:scope => 'publishable',:default=>"This #{self.class.name.downcase!} needs a/an #{field.singularize}.")
+          readiness_errors << readiness_error
         end
       end
       

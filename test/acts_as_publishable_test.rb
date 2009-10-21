@@ -337,6 +337,28 @@ class ActAsPublishableTest < Test::Unit::TestCase
   end
   
   
+  def test_readiness_error
+    publisher = Publisher.create(:name => "wrox")
+    
+    author1 = Author.create(:name => "", :bio => "some bio sam")
+    author2 = Author.create(:name => "", :bio => "some bio ann")
+    
+    author1.publishers << publisher
+    author2.publishers << publisher
+    
+    book = Book.new
+    book.name = "Readiness errors"
+    book.description = "Testing readiness messages"
+    book.authors << author1
+    book.authors << author2
+    book.save
+    readiness_errors = book.validate_readiness
+    assert_equal readiness_errors.first, "This book needs a/an author."
+    
+  end
+  
+  
+  
   def get_book
     publisher = Publisher.create(:name => "wrox")
     
