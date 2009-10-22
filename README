@@ -16,6 +16,8 @@ Example
 
 visit http://publishable.continuouslearning.org
 
+more documentation http://www.weebadde.com/?p=15
+
 Step 1.
 
 script/plugin install git://github.com/prabode/acts_as_publishable
@@ -86,6 +88,14 @@ Note:
 The i18n key format (example video_title, "#{self.class.name.downcase!}_#{field}") is generated using the model name and the respective field name given in the "required_fields_for_publishing" list.
 
 Step 5.
+Include “publishing_status_tag” tag in your views where you need the status and controls to appear.
+Here is an example again from our demo app.
+
+admin/videos/show.html.erb
+
+<%= publishing_actions_tag(@video)%>
+
+Step 6.
 Review tests for more information.
 
 
