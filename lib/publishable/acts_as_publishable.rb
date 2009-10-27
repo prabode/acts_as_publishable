@@ -138,7 +138,7 @@ module Publishable
     def publish
       if not published?
         write_attribute self.class.status_column, "published"
-        write_attribute :published_at, Time.now if self.respond_to?(:published_at)
+        write_attribute :published_at, Time.zone.now  if (self.respond_to?(:published_at) && read_attribute("published_at").nil?)
         save
       end
     end
@@ -146,7 +146,7 @@ module Publishable
     def archive
       if not archived?
         write_attribute self.class.status_column, "archived"
-        write_attribute :archived_at, Time.now if self.respond_to?(:archived_at)
+        write_attribute :archived_at, Time.zone.now if (self.respond_to?(:archived_at) && read_attribute("archived_at").nil?)
         save
       end
     end
