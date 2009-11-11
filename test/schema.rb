@@ -42,4 +42,44 @@ ActiveRecord::Schema.define(:version => 0) do
     t.integer :magazine_id
     t.string :name 
   end
+  
+  #many to many
+  create_table :physicians, :force => true do |t|
+    t.string :name
+    t.string :status
+  end
+  
+  create_table :patients, :force => true do |t|
+    t.string :name
+    t.string :status
+  end
+  
+  create_table :appointments, :force => true do |t|
+    t.integer :physician_id
+    t.integer :patient_id
+  end
+  
+  #one to many
+  create_table :teams, :force => true do |t|
+    t.string :name
+    t.string :status
+  end
+  
+  create_table :players, :force => true do |t|
+    t.string :name
+    t.string :status
+    t.integer :team_id
+  end
+  
+  #one to one   
+  create_table :boys, :force => true do |t|
+    t.string :name
+    t.string :status
+  end
+  
+  create_table :girls, :force => true do |t|
+    t.string :name
+    t.string :status
+    t.integer :boy_id
+  end
 end 

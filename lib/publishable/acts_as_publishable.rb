@@ -106,15 +106,14 @@ module Publishable
           yield if block_given?
         end
       end
-      
-      
-      
-      
+     
       send :include, InstanceMethods
     end
   end
   
   module InstanceMethods    
+    attr_accessor :main_caller
+    
     def set_initial_status
       write_attribute self.class.status_column, "not_ready" if new_record?
     end
@@ -138,7 +137,8 @@ module Publishable
     def publish
       if not published?
         write_attribute self.class.status_column, "published"
-        write_attribute :published_at, Time.zone.now  if (self.respond_to?(:published_at) && read_attribute("published_at").nil?)
+        current_time = Time.zone.now
+        write_attribute :published_at, (current_time - ((current_time.min % 15)*60) - current_time.sec)  if (self.respond_to?(:published_at) && read_attribute("published_at").nil?)
         save
       end
     end
@@ -146,7 +146,8 @@ module Publishable
     def archive
       if not archived?
         write_attribute self.class.status_column, "archived"
-        write_attribute :archived_at, Time.zone.now if (self.respond_to?(:archived_at) && read_attribute("archived_at").nil?)
+        current_time = Time.zone.now
+        write_attribute :archived_at, (current_time - ((current_time.min % 15)*60) - current_time.sec) if (self.respond_to?(:archived_at) && read_attribute("archived_at").nil?)
         save
       end
     end
@@ -164,7 +165,7 @@ module Publishable
     end
     
     def validate_readiness(is_on_save = false)
-
+      self.main_caller = (self.main_caller || self.class.name)       
       old_status = read_attribute(self.class.status_column) || "not_ready"
       write_attribute self.class.status_column, "not_ready"
       
@@ -173,19 +174,31 @@ module Publishable
       # Verify our required fields
       self.class.required_fields_for_publishing.each do |field|
         result = self.send(field)
-        
         if result.kind_of? Array
-          valid = result.size > 0
-          if result.size > 0
-            result.select { |r| r.class.respond_to?(:required_fields_for_publishing)}.each do |r| 
-              if !r.validate_readiness.empty? #r.archived? || 
-                valid = false
-                break
+          if result.name.eql?(self.main_caller)
+            valid = true
+          else 
+            valid = result.size > 0
+            if valid
+              #validate the elements of the array
+              valid = false
+              result.each do |r|
+                if r.class.respond_to?(:required_fields_for_publishing)
+                  r.main_caller = self.main_caller
+                  if r.validate_readiness(true).empty?
+                    valid = true
+                    break
+                  end
+                else
+                  valid = true
+                  break
+                end
               end
             end
           end
         elsif result.class.respond_to?(:required_fields_for_publishing)
-          valid = result && ["ready", "published", "archived"].include?(result.read_attribute(self.class.status_column))
+          result.main_caller = self.main_caller
+          valid = result.class.name.eql?(self.main_caller) || result.validate_readiness(false).empty?
         elsif result.kind_of? String
           valid = !result.blank?
         else
@@ -200,32 +213,37 @@ module Publishable
       end
       
       if readiness_errors.empty?
-        #        puts old_status
         write_attribute self.class.status_column, (old_status == "not_ready" ? "ready" : old_status)
         if read_attribute(self.class.status_column).eql?("published")
           # Trickle down publication
-          
           self.class.required_fields_for_publishing.each do |field|
             result = self.send(field)
             
             if result.kind_of? Array
-              result.select { |r| r.class.respond_to?(:required_fields_for_publishing) && !r.published? }.each do |r| 
-                r.publish 
+              if !result.name.eql?(self.main_caller)
+                result.select { |r| r.class.respond_to?(:required_fields_for_publishing) && !r.published?}.each do |r|
+                  r.main_caller = self.main_caller
+                  r.publish
+                end
               end
-            elsif result.class.respond_to?(:required_fields_for_publishing) && !result.published?
+            elsif result.class.respond_to?(:required_fields_for_publishing) && !result.published? && !result.class.name.eql?(self.main_caller)
+              result.main_caller = self.main_caller
               result.publish
             end
           end
         else
           self.class.required_fields_for_publishing.each do |field|
-            result = self.send(field)
-            
+            result = self.send(field)           
             if result.kind_of? Array
-              result.select { |r| r.class.respond_to?(:required_fields_for_publishing) && !r.published? }.each do |r| 
-                r.reset 
+              if !result.name.eql?(self.main_caller)
+                result.select { |r| r.class.respond_to?(:required_fields_for_publishing) && !r.published?}.each do |r|
+                  r.main_caller = self.main_caller
+                  r.reset
+                end
               end
-            elsif result.class.respond_to?(:required_fields_for_publishing) && !result.published?
-              result.reset
+            elsif result.class.respond_to?(:required_fields_for_publishing) && !result.published? && !result.class.name.eql?(self.main_caller)
+              result.main_caller = self.main_caller
+              result.reset             
             end
           end
         end
@@ -234,17 +252,21 @@ module Publishable
           result = self.send(field)
           
           if result.kind_of? Array
-            result.select { |r| r.class.respond_to?(:required_fields_for_publishing)}.each do |r| 
-              r.validate_readiness 
+            if !result.name.eql?(self.main_caller)
+              result.select { |r| r.class.respond_to?(:required_fields_for_publishing)}.each do |r|
+                r.main_caller = self.main_caller
+                r.validate_readiness 
+              end
             end
-          elsif result.class.respond_to?(:required_fields_for_publishing)
-            result.validate_readiness
+          elsif result.class.respond_to?(:required_fields_for_publishing) && !result.class.name.eql?(self.main_caller)
+            result.main_caller = self.main_caller
+            result.validate_readiness 
           end
         end         
       end
       
-      save if (!read_attribute(self.class.status_column).eql?(old_status)) && !is_on_save
-      
+      save if (!read_attribute(self.class.status_column).eql?(old_status) && !is_on_save)
+
       readiness_errors
     end
   end
